@@ -64,7 +64,7 @@ export async function dashboardPage(
 ): Promise<DashboardPage> {
 	const offset = (page - 1) * pageSize;
 	const rows =
-		await db()`SELECT p.id,p.number,p.title,p.author,p.risk_tier,p.risk_rationale,p.risk_confidence,p.scored_at,o.outcome_type,COUNT(*) OVER() AS total_count FROM pull_requests p LEFT JOIN outcomes o ON o.pr_id=p.id WHERE p.repo_id=${repoId} ORDER BY p.scored_at DESC LIMIT ${pageSize} OFFSET ${offset}`;
+		await db()`SELECT p.id,p.number,p.title,p.author,p.files_changed,p.risk_tier,p.risk_rationale,p.risk_confidence,p.scored_at,o.outcome_type,COUNT(*) OVER() AS total_count FROM pull_requests p LEFT JOIN outcomes o ON o.pr_id=p.id WHERE p.repo_id=${repoId} ORDER BY p.scored_at DESC LIMIT ${pageSize} OFFSET ${offset}`;
 	return {
 		records: rows as DashboardPr[],
 		total: rows[0] ? Number(rows[0].total_count) : 0,

@@ -15,6 +15,7 @@ vi.mock("@/lib/repositories", () => ({
 				risk_confidence: 0.9,
 				scored_at: "2026-07-10T00:00:00Z",
 				outcome_type: "reverted",
+				files_changed: [],
 			},
 		],
 		total: 21,

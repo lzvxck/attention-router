@@ -12,12 +12,14 @@ export default async function Page({
 	const requestedPage = Number((await searchParams).page ?? 1);
 	const page =
 		Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+	let repository: { name: string; owner: string } | undefined;
 	let result: Awaited<ReturnType<typeof dashboardPage>> = {
 		records: [],
 		total: 0,
 	};
 	try {
 		const config = env.auth();
+		repository = { name: config.demoRepoName, owner: config.demoRepoOwner };
 		const repoId = await demoRepoId(config.demoRepoOwner, config.demoRepoName);
 		if (repoId) result = await dashboardPage(repoId, page);
 	} catch {
@@ -49,6 +51,7 @@ export default async function Page({
 			<PrTimeline
 				records={result.records}
 				pagination={{ basePath: "/", page, pageSize: 20, total: result.total }}
+				repository={repository}
 			/>
 		</>
 	);

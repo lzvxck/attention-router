@@ -64,6 +64,7 @@ export default async function RepositoryPage({
 					pageSize: 20,
 					total: result.total,
 				}}
+				repository={repo}
 			/>
 		</>
 	);

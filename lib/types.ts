@@ -31,6 +31,7 @@ export type DashboardPr = {
 	risk_confidence: number;
 	scored_at: string;
 	outcome_type: string | null;
+	files_changed: ChangedFile[];
 };
 export type DashboardPage = {
 	records: DashboardPr[];
