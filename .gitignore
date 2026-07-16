@@ -6,3 +6,6 @@ coverage/
 *.tsbuildinfo
 IMPLEMENTATION_PLAN.md
 .agents/
+*.pem
+webhooksecret.md
+DESIGN.md
