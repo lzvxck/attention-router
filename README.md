@@ -1,5 +1,9 @@
 # PR Attention Router
 
+## GitHub OAuth dashboard setup
+
+Enable **Request user authorization (OAuth) during installation** for the GitHub App, grant **Email addresses: Read-only**, and set the callback URL to `https://<your-domain>/api/auth/callback/github`. Set `BETTER_AUTH_URL`, `SESSION_SECRET` (32+ random bytes), `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `DEMO_REPO_OWNER`, and `DEMO_REPO_NAME` before deploying. Anonymous visitors see only the configured demo repository; signed-in users can view only repositories returned by GitHub for their installations.
+
 GitHub App that routes pull requests to the right level of reviewer attention, then calibrates those decisions against native GitHub reverts.
 
 ## Local setup

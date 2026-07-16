@@ -32,3 +32,8 @@ export type DashboardPr = {
 	scored_at: string;
 	outcome_type: string | null;
 };
+export type DashboardRepo = {
+	id: number;
+	owner: string;
+	name: string;
+};

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const sql = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db", () => ({ db: () => sql }));
 
-import { markReverted, saveVerdict } from "@/lib/repositories";
+import { dashboard, markReverted, saveVerdict } from "@/lib/repositories";
 
 describe("repository idempotency", () => {
 	beforeEach(() => sql.mockReset());
@@ -33,5 +33,11 @@ describe("repository idempotency", () => {
 		await expect(markReverted(1, "sha", 3)).resolves.toBe(true);
 		expect(sql).toHaveBeenCalledOnce();
 		expect(sql.mock.calls[0][0].join("")).toContain("outcome AS");
+	});
+	it("scopes dashboard records to the requested repository", async () => {
+		sql.mockResolvedValueOnce([]);
+		await dashboard(42);
+		expect(sql.mock.calls[0][0].join("")).toContain("WHERE p.repo_id=");
+		expect(sql.mock.calls[0][1]).toBe(42);
 	});
 });

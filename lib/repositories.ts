@@ -1,6 +1,12 @@
 import { db } from "./db";
 import { pathPattern } from "./revert-calibration";
-import type { ChangedFile, DashboardPr, RiskStat, RiskVerdict } from "./types";
+import type {
+	ChangedFile,
+	DashboardPr,
+	DashboardRepo,
+	RiskStat,
+	RiskVerdict,
+} from "./types";
 
 export async function upsertRepo(
 	owner: string,
@@ -50,6 +56,18 @@ export async function markReverted(
 		await db()`WITH original AS (SELECT id,files_changed FROM pull_requests WHERE repo_id=${repoId} AND head_sha=${sha}), outcome AS (INSERT INTO outcomes (pr_id,outcome_type,reverted_by_pr_id,detected_at) SELECT id,'reverted',(SELECT id FROM pull_requests WHERE repo_id=${repoId} AND number=${revertedByNumber}),now() FROM original ON CONFLICT (pr_id) DO NOTHING RETURNING pr_id), patterns AS (SELECT DISTINCT CASE WHEN position('/' IN item->>'filename') > 0 THEN split_part(item->>'filename','/',1) || '/*' ELSE item->>'filename' END AS path_pattern FROM original,jsonb_array_elements(original.files_changed) item), stats AS (INSERT INTO file_risk_stats (repo_id,path_pattern,total_prs,reverted_prs,updated_at) SELECT ${repoId},path_pattern,0,1,now() FROM patterns,outcome ON CONFLICT (repo_id,path_pattern) DO UPDATE SET reverted_prs=file_risk_stats.reverted_prs+1,updated_at=now() RETURNING path_pattern) SELECT EXISTS(SELECT 1 FROM original) AS found`;
 	return Boolean(rows[0]?.found);
 }
-export async function dashboard(): Promise<DashboardPr[]> {
-	return (await db()`SELECT p.id,p.number,p.title,p.author,p.risk_tier,p.risk_rationale,p.risk_confidence,p.scored_at,o.outcome_type FROM pull_requests p LEFT JOIN outcomes o ON o.pr_id=p.id ORDER BY p.scored_at DESC LIMIT 100`) as DashboardPr[];
+export async function dashboard(repoId: number): Promise<DashboardPr[]> {
+	return (await db()`SELECT p.id,p.number,p.title,p.author,p.risk_tier,p.risk_rationale,p.risk_confidence,p.scored_at,o.outcome_type FROM pull_requests p LEFT JOIN outcomes o ON o.pr_id=p.id WHERE p.repo_id=${repoId} ORDER BY p.scored_at DESC LIMIT 100`) as DashboardPr[];
+}
+export async function demoRepoId(owner: string, name: string) {
+	const rows =
+		await db()`SELECT id FROM repos WHERE owner=${owner} AND name=${name}`;
+	return rows[0]?.id as number | undefined;
+}
+export async function reposForAccessibleRepositories(
+	repositories: { owner: string; name: string }[],
+): Promise<DashboardRepo[]> {
+	if (!repositories.length) return [];
+	const requested = JSON.stringify(repositories);
+	return (await db()`SELECT repos.id,repos.owner,repos.name FROM repos JOIN jsonb_to_recordset(${requested}::jsonb) AS requested(owner text,name text) ON repos.owner=requested.owner AND repos.name=requested.name ORDER BY repos.owner,repos.name`) as DashboardRepo[];
 }

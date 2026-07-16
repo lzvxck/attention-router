@@ -11,6 +11,7 @@ deadline **July 21, 2026, 5:00pm PT**).
 - The webhook endpoint is `POST /api/github/webhook`; it verifies signatures, scores open/synchronize events, writes Check Runs, and calibrates native merged reverts.
 - Code quality uses Biome (formatter and recommended linter rules) without ESLint or Prettier. Biome's recommended rules cover React exhaustive dependencies and the applicable accessibility checks for this small dashboard.
 - Bun is the package manager and local script runner. Vercel production remains on Node.js: the webhook route explicitly declares `runtime = "nodejs"`; Bun is not a Vercel Functions runtime here.
+- Per-user dashboard access uses Better Auth's stateless encrypted GitHub OAuth cookies. Enable GitHub App user authorization, grant **Email addresses: Read-only**, and set the callback to `/api/auth/callback/github`; the dashboard cross-references GitHub-accessible installation repositories server-side before querying data.
 
 **Status:** planning complete, no code written yet. This file is the durable
 source of truth — update it (not just `IMPLEMENTATION_PLAN.md`, which is a

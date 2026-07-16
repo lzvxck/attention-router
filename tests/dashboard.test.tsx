@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/repositories", () => ({
+	demoRepoId: vi.fn().mockResolvedValue(1),
 	dashboard: vi.fn().mockResolvedValue([
 		{
 			id: 1,
@@ -15,6 +16,11 @@ vi.mock("@/lib/repositories", () => ({
 			outcome_type: "reverted",
 		},
 	]),
+}));
+vi.mock("@/lib/env", () => ({
+	env: {
+		auth: () => ({ demoRepoOwner: "acme", demoRepoName: "demo" }),
+	},
 }));
 
 import Page from "@/app/page";
