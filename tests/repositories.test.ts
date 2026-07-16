@@ -3,7 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const sql = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db", () => ({ db: () => sql }));
 
-import { dashboard, markReverted, saveVerdict } from "@/lib/repositories";
+import {
+	dashboard,
+	markReverted,
+	reposForAccessibleRepositories,
+	saveVerdict,
+} from "@/lib/repositories";
 
 describe("repository idempotency", () => {
 	beforeEach(() => sql.mockReset());
@@ -39,5 +44,11 @@ describe("repository idempotency", () => {
 		await dashboard(42);
 		expect(sql.mock.calls[0][0].join("")).toContain("WHERE p.repo_id=");
 		expect(sql.mock.calls[0][1]).toBe(42);
+	});
+	it("normalizes database repository IDs before route authorization", async () => {
+		sql.mockResolvedValueOnce([{ id: "1", owner: "acme", name: "demo" }]);
+		await expect(
+			reposForAccessibleRepositories([{ owner: "acme", name: "demo" }]),
+		).resolves.toEqual([{ id: 1, owner: "acme", name: "demo" }]);
 	});
 });

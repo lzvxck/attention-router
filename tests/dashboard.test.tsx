@@ -22,6 +22,12 @@ vi.mock("@/lib/env", () => ({
 		auth: () => ({ demoRepoOwner: "acme", demoRepoName: "demo" }),
 	},
 }));
+vi.mock("@/lib/auth", () => ({
+	auth: { api: { getSession: vi.fn().mockResolvedValue(null) } },
+}));
+vi.mock("next/headers", () => ({
+	headers: vi.fn().mockResolvedValue(new Headers()),
+}));
 
 import Page from "@/app/page";
 

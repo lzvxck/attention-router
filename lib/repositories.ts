@@ -62,12 +62,14 @@ export async function dashboard(repoId: number): Promise<DashboardPr[]> {
 export async function demoRepoId(owner: string, name: string) {
 	const rows =
 		await db()`SELECT id FROM repos WHERE owner=${owner} AND name=${name}`;
-	return rows[0]?.id as number | undefined;
+	return rows[0] ? Number(rows[0].id) : undefined;
 }
 export async function reposForAccessibleRepositories(
 	repositories: { owner: string; name: string }[],
 ): Promise<DashboardRepo[]> {
 	if (!repositories.length) return [];
 	const requested = JSON.stringify(repositories);
-	return (await db()`SELECT repos.id,repos.owner,repos.name FROM repos JOIN jsonb_to_recordset(${requested}::jsonb) AS requested(owner text,name text) ON repos.owner=requested.owner AND repos.name=requested.name ORDER BY repos.owner,repos.name`) as DashboardRepo[];
+	const rows =
+		await db()`SELECT repos.id,repos.owner,repos.name FROM repos JOIN jsonb_to_recordset(${requested}::jsonb) AS requested(owner text,name text) ON repos.owner=requested.owner AND repos.name=requested.name ORDER BY repos.owner,repos.name`;
+	return rows.map((row) => ({ ...row, id: Number(row.id) })) as DashboardRepo[];
 }

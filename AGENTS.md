@@ -1,75 +1,77 @@
-# Project: PR Attention Router
+# PR Attention Router
 
-Submission for **OpenAI Build Week** (Devpost, category **Developer Tools**,
-deadline **July 21, 2026, 5:00pm PT**).
+OpenAI Build Week Developer Tools submission. It routes reviewer attention:
+each GitHub PR is scored as `auto-mergeable`, `quick-glance`, or `deep-review`
+with an explanation calibrated against that repository's native revert history.
 
-## Implementation record (2026-07-16)
+## Delivery status
 
-- Implemented locally as a latest-stable Next.js App Router app; deployment and public repository URLs are still pending.
-- Runtime scoring uses Groq's free-tier-compatible OpenAI chat-completions API at `https://api.groq.com/openai/v1`, not the OpenAI API.
-- `db/migrations/001_initial_schema.sql` adds the four planned tables, unique `(owner,name)` and `(repo_id,number)` keys, and primary-keyed outcomes for webhook redelivery idempotency.
-- The webhook endpoint is `POST /api/github/webhook`; it verifies signatures, scores open/synchronize events, writes Check Runs, and calibrates native merged reverts.
-- Code quality uses Biome (formatter and recommended linter rules) without ESLint or Prettier. Biome's recommended rules cover React exhaustive dependencies and the applicable accessibility checks for this small dashboard.
-- Bun is the package manager and local script runner. Vercel production remains on Node.js: the webhook route explicitly declares `runtime = "nodejs"`; Bun is not a Vercel Functions runtime here.
-- Per-user dashboard access uses Better Auth's stateless encrypted GitHub OAuth cookies. Enable GitHub App user authorization, grant **Email addresses: Read-only**, and set the callback to `/api/auth/callback/github`; the dashboard cross-references GitHub-accessible installation repositories server-side before querying data.
+- The app is implemented locally; deployment, public repository URLs, GitHub App
+  registration, and demo-repo seeding remain manual follow-up work.
+- The core was built in Codex. Preserve the session evidence needed for submission.
+- This is the judged app repo. The separate demo repo is a real-time leaderboard /
+  counter fixture with 15–20 PRs and 3–5 native GitHub revert PRs.
 
-**Status:** planning complete, no code written yet. This file is the durable
-source of truth — update it (not just `IMPLEMENTATION_PLAN.md`, which is a
-local scratch doc and is not committed) as soon as real decisions or URLs
-replace the planned ones below. In particular: refresh this file once the
-GitHub App webhook endpoint exists — swap the planned core-loop steps for
-what was actually built, add the real repo names/URLs, and note any schema
-changes made during implementation.
+## Stack and tooling
 
-## What we're building (one-liner)
+- Next.js 16 App Router + TypeScript, deployed to Vercel. Webhook routes use
+  Node.js (`runtime = "nodejs"`); Bun is never a Vercel Functions runtime here.
+- Bun is the package manager and local script runner: use `bun run <script>` and
+  `bun install --frozen-lockfile`, never npm/pnpm for this project.
+- Biome is the formatter and recommended linter. Run `bun run format`,
+  `bun run lint`, `bun run typecheck`, `bun run test`, and `bun run build`.
+- Neon Postgres uses parameterized SQL through `@neondatabase/serverless`; no ORM.
+- GitHub integration uses Octokit, `@octokit/webhooks`, and `@octokit/auth-app`.
+- Risk scoring uses Groq's OpenAI-compatible API at `https://api.groq.com/openai/v1`.
 
-A GitHub App that scores every PR with an LLM into a risk tier
-(auto-mergeable / quick glance / deep review) with a rationale, calibrated
-against that specific repo's real revert history — an attention router, not
-another "read the diff and comment" review bot.
+## Core webhook and data flow
 
-## Hard constraints (do not violate)
+1. `POST /api/github/webhook` verifies GitHub signatures.
+2. `opened` / `synchronize` fetch changed files, retrieves path risk stats, asks
+   Groq for strict JSON output, persists the verdict, and posts a Check Run.
+3. `closed` + merged stores `merge_commit_sha` as the original PR's `head_sha`.
+4. Native reverts (`Revert "…"` + `This reverts commit <sha>.`) mark the original
+   PR as reverted and atomically update path-pattern calibration statistics.
+5. Persistence is idempotent for webhook redelivery; do not split its atomic CTEs.
 
-- The core implementation must be built predominantly **in an OpenAI Codex
-  session** — a Codex session ID covering "the majority of core
-  functionality" is a submission requirement. This is a build-tool
-  requirement only — the shipped app does NOT need to call the OpenAI API at
-  runtime.
-- Two separate GitHub repos (both public, on the user's account):
-  - **Demo repo** (fixture, not judged core): a real-time leaderboard/counter
-    service for millions of users, seeded with ~15–20 real PRs (3–5 of them
-    later reverted via GitHub's native "Revert" button convention:
-    title `Revert "<original title>"`, body `This reverts commit <sha>.`).
-  - **App repo** (the judged Project — this is where the webhook endpoint
-    below lives): Next.js (latest stable, App Router) + TypeScript on Vercel,
-    Neon Postgres, Octokit + `@octokit/webhooks` + `@octokit/auth-app` for
-    GitHub, **Groq's OpenAI-compatible chat completions API** (free tier,
-    chosen since runtime OpenAI API usage is not required) for
-    structured/JSON-schema output.
+## Database
 
-## Core loop (app repo — build predominantly in Codex)
+`db/migrations/001_initial_schema.sql` owns these tables:
 
-1. Webhook receiver verifies signature, handles `pull_request` `opened` /
-   `synchronize` / `closed`(merged).
-2. On open/sync: fetch diff + changed files; pull prior risk stats for
-   matching file/path patterns from Postgres.
-3. Call Groq (OpenAI-compatible chat completions API) with a structured prompt → `{ tier, confidence, rationale, key_risk_factors }`.
-4. Post result as a GitHub Check Run (tier as conclusion, rationale in output).
-5. Store the PR + verdict in Postgres.
-6. On merge: detect native revert PRs, resolve the original PR via commit SHA,
-   mark its outcome `reverted`, update a per-file-pattern revert-rate table
-   that biases future Groq calls (simple/rule-based calibration, not ML).
-7. Public, unauthenticated dashboard: PR timeline with risk tier at decision
-   time vs. actual outcome, plus a calibration-over-time view.
+- `repos(id, owner, name, installation_id)` — unique `(owner, name)`.
+- `pull_requests(..., repo_id, number, head_sha, files_changed, verdict fields)` —
+  unique `(repo_id, number)`.
+- `outcomes(pr_id, outcome_type, reverted_by_pr_id, detected_at)`.
+- `file_risk_stats(repo_id, path_pattern, total_prs, reverted_prs, updated_at)`.
 
-**DB schema:**
+## Dashboard and auth
 
-- `repos(id, owner, name, installation_id)`
-- `pull_requests(id, repo_id, number, title, author, head_sha, files_changed jsonb, risk_tier, risk_rationale, risk_confidence, scored_at)`
-- `outcomes(pr_id, outcome_type, reverted_by_pr_id, detected_at)`
-- `file_risk_stats(repo_id, path_pattern, total_prs, reverted_prs, updated_at)`
+- `/` is public and displays only `DEMO_REPO_OWNER` / `DEMO_REPO_NAME`; never show
+  unscoped PR data from other installations.
+- Better Auth provides stateless encrypted GitHub OAuth session/account cookies;
+  no additional auth tables are used.
+- `/api/auth/[...all]` owns Better Auth's OAuth callbacks; client controls call its
+  typed client, never handle provider tokens directly.
+- `/app` resolves GitHub installations/repos accessible to the signed-in user and
+  intersects them with local `repos` records. `/app/[repoId]` repeats the server-side
+  membership check before querying; a URL parameter alone is never authorization.
+- GitHub App setup: enable user authorization, grant **Email addresses: Read-only**,
+  and set callback URL to `/api/auth/callback/github`.
+- Required auth/demo env: `BETTER_AUTH_URL`, `SESSION_SECRET` (32+ random bytes),
+  `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `DEMO_REPO_OWNER`, and
+  `DEMO_REPO_NAME`. Keep every secret server-only and out of logs/client bundles.
 
-## Rules
+## UI
 
-Follow `.codex/rules/code-quality.md` when writing, editing, or reviewing any
-code in this repo (simplicity, surgical changes, goal-driven execution).
+- Follow `DESIGN.md`: Discord-inspired dark surfaces, blurple primary actions,
+  GGSans/Inter stack, 8px spacing, text labels beside risk colors, 44px controls,
+  visible focus treatment, and reduced-motion support.
+- The public sign-in control belongs in the top navigation, not the hero.
+
+## Engineering rules
+
+- Follow `.codex/rules/code-quality.md`: state assumptions, make surgical changes,
+  and verify each goal. Preserve unrelated work in a dirty worktree.
+- Use `apply_patch` for file edits. Do not read, write, or commit secrets.
+- `IMPLEMENTATION_PLAN.md` and `.agents/` are intentionally ignored and absent from
+  Git history. Commits must be unsigned unless the user explicitly changes this.
