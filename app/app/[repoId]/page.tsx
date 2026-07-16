@@ -1,18 +1,25 @@
 import { ArrowLeft } from "lucide-react";
 import { PrTimeline } from "@/components/pr-timeline";
-import { UserMenu } from "@/components/user-menu";
 import { auth } from "@/lib/auth";
 import { userInstallations } from "@/lib/github";
-import { dashboard, reposForAccessibleRepositories } from "@/lib/repositories";
+import {
+	dashboardPage,
+	reposForAccessibleRepositories,
+} from "@/lib/repositories";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 export default async function RepositoryPage({
 	params,
+	searchParams,
 }: {
 	params: Promise<{ repoId: string }>;
+	searchParams: Promise<{ page?: string }>;
 }) {
 	const repoId = Number((await params).repoId);
+	const requestedPage = Number((await searchParams).page ?? 1);
+	const page =
+		Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 	const requestHeaders = await headers();
 	const session = await auth.api.getSession({ headers: requestHeaders });
 	if (!session) redirect("/");
@@ -26,6 +33,7 @@ export default async function RepositoryPage({
 	);
 	const repo = repos.find((candidate) => candidate.id === repoId);
 	if (!repo) notFound();
+	const result = await dashboardPage(repo.id, page);
 	return (
 		<>
 			<header className="grid gap-4 rounded-xl border border-edge bg-linear-to-br from-surface-3 to-canvas p-8">
@@ -46,10 +54,17 @@ export default async function RepositoryPage({
 						<ArrowLeft aria-hidden="true" size={16} />
 						Change repository
 					</a>
-					<UserMenu image={session.user.image} name={session.user.name} />
 				</div>
 			</header>
-			<PrTimeline records={await dashboard(repo.id)} />
+			<PrTimeline
+				records={result.records}
+				pagination={{
+					basePath: `/app/${repo.id}`,
+					page,
+					pageSize: 20,
+					total: result.total,
+				}}
+			/>
 		</>
 	);
 }

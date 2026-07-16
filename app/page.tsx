@@ -1,36 +1,30 @@
 import { PrTimeline } from "@/components/pr-timeline";
-import { SignInButton } from "@/components/sign-in-button";
-import { UserMenu } from "@/components/user-menu";
-import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
-import { dashboard, demoRepoId } from "@/lib/repositories";
-import { headers } from "next/headers";
+import { dashboardPage, demoRepoId } from "@/lib/repositories";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
-	const session = await auth.api.getSession({ headers: await headers() });
-	let records: Awaited<ReturnType<typeof dashboard>> = [];
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ page?: string }>;
+}) {
+	const requestedPage = Number((await searchParams).page ?? 1);
+	const page =
+		Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+	let result: Awaited<ReturnType<typeof dashboardPage>> = {
+		records: [],
+		total: 0,
+	};
 	try {
 		const config = env.auth();
 		const repoId = await demoRepoId(config.demoRepoOwner, config.demoRepoName);
-		if (repoId) records = await dashboard(repoId);
+		if (repoId) result = await dashboardPage(repoId, page);
 	} catch {
 		/* Permit deployment before demo and OAuth values are configured. */
 	}
 	return (
 		<>
-			<nav
-				className="flex min-h-12 items-center justify-between"
-				aria-label="Primary navigation"
-			>
-				<span className="text-sm font-bold text-muted">Public demo</span>
-				{session ? (
-					<UserMenu image={session.user.image} name={session.user.name} />
-				) : (
-					<SignInButton />
-				)}
-			</nav>
 			<header className="grid min-h-55 max-w-none gap-3 rounded-xl border border-edge bg-linear-to-br from-primary/15 to-surface-1 p-8 sm:p-12">
 				<p className="m-0 text-xs font-bold tracking-[0.08em] text-muted">
 					REVIEW INTELLIGENCE
@@ -52,7 +46,10 @@ export default async function Page() {
 					</span>
 				</div>
 			</header>
-			<PrTimeline records={records} />
+			<PrTimeline
+				records={result.records}
+				pagination={{ basePath: "/", page, pageSize: 20, total: result.total }}
+			/>
 		</>
 	);
 }

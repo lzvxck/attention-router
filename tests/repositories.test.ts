@@ -4,7 +4,7 @@ const sql = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db", () => ({ db: () => sql }));
 
 import {
-	dashboard,
+	dashboardPage,
 	markReverted,
 	reposForAccessibleRepositories,
 	saveVerdict,
@@ -41,9 +41,16 @@ describe("repository idempotency", () => {
 	});
 	it("scopes dashboard records to the requested repository", async () => {
 		sql.mockResolvedValueOnce([]);
-		await dashboard(42);
+		await dashboardPage(42, 1);
 		expect(sql.mock.calls[0][0].join("")).toContain("WHERE p.repo_id=");
 		expect(sql.mock.calls[0][1]).toBe(42);
+	});
+	it("paginates dashboard records in the database", async () => {
+		sql.mockResolvedValueOnce([{ id: 1, total_count: "21" }]);
+		await expect(dashboardPage(42, 2)).resolves.toMatchObject({ total: 21 });
+		const [query, repoId, pageSize, offset] = sql.mock.calls[0];
+		expect(query.join("")).toContain("LIMIT");
+		expect([repoId, pageSize, offset]).toEqual([42, 20, 20]);
 	});
 	it("normalizes database repository IDs before route authorization", async () => {
 		sql.mockResolvedValueOnce([{ id: "1", owner: "acme", name: "demo" }]);

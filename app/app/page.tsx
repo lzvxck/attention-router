@@ -1,5 +1,4 @@
 import { FolderGit2 } from "lucide-react";
-import { UserMenu } from "@/components/user-menu";
 import { auth } from "@/lib/auth";
 import { userInstallations } from "@/lib/github";
 import { reposForAccessibleRepositories } from "@/lib/repositories";
@@ -22,20 +21,17 @@ export default async function AppPage() {
 	if (repos.length === 1) redirect(`/app/${repos[0].id}`);
 	return (
 		<section className="grid gap-8 pt-8">
-			<div className="flex items-start justify-between gap-4 max-sm:flex-col">
-				<div>
-					<p className="m-0 text-xs font-bold tracking-[0.08em] text-muted">
-						YOUR REPOSITORIES
-					</p>
-					<h1 className="mb-2 mt-3 text-4xl font-bold tracking-[-0.03em]">
-						Choose a repository
-					</h1>
-					<p className="m-0 max-w-2xl leading-relaxed text-muted">
-						Signed in as {session.user.name}. Each dashboard is private to your
-						GitHub installation access.
-					</p>
-				</div>
-				<UserMenu image={session.user.image} name={session.user.name} />
+			<div>
+				<p className="m-0 text-xs font-bold tracking-[0.08em] text-muted">
+					YOUR REPOSITORIES
+				</p>
+				<h1 className="mb-2 mt-3 text-4xl font-bold tracking-[-0.03em]">
+					Choose a repository
+				</h1>
+				<p className="m-0 max-w-2xl leading-relaxed text-muted">
+					Signed in as {session.user.name}. Each dashboard is private to your
+					GitHub installation access.
+				</p>
 			</div>
 			{repos.length ? (
 				<ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 p-0">

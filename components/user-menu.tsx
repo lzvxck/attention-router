@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, FolderGit2, LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -40,14 +40,6 @@ export function UserMenu({ image, name }: UserMenuProps) {
 					className="absolute right-0 z-10 mt-2 grid min-w-52 overflow-hidden rounded-xl border border-edge bg-surface-1 p-1 shadow-[0_8px_32px_rgb(0_0_0_/_0.6)]"
 					role="menu"
 				>
-					<a
-						className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-bold no-underline transition hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
-						href="/app"
-						role="menuitem"
-					>
-						<FolderGit2 aria-hidden="true" size={16} />
-						Your repositories
-					</a>
 					<button
 						className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-left text-sm font-bold transition hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
 						onClick={() => authClient.signOut()}
