@@ -21,3 +21,8 @@
 ## 2026-07-16T15:56:00-03:00 APPROVED / EXECUTE
 - User approved implementation and selected Groq free tier through its OpenAI-compatible API.
 - User required latest stable Next.js. Official Next.js release notes identify 16.2 as current stable; implementation will use `next@latest`, not the 16.3 preview.
+
+## 2026-07-16T16:03:00-03:00 IMPLEMENT / VERIFY
+- Implemented the Next.js 16.2.10 App Router dashboard, signed webhook route, Groq OpenAI-compatible scoring, GitHub Check Runs, Neon repositories/migration, revert calibration, environment template, README, and unit tests.
+- Verified: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test` (6 passing), and `npm.cmd run build` all exit 0.
+- Initialized local Git after replacing the inaccessible empty metadata directory; root implementation commit: `88aa71d` (`feat: implement pr attention router`).
