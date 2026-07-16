@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { scoringPrompt, validateVerdict } from "@/lib/risk-scoring";
+describe("risk verdicts", () => { it("accepts the required schema", () => expect(validateVerdict({ tier: "quick-glance", confidence: .8, rationale: "small change", key_risk_factors: ["tests"] }).tier).toBe("quick-glance")); it("rejects unsupported tiers", () => expect(() => validateVerdict({ tier: "safe", confidence: .8, rationale: "x", key_risk_factors: [] })).toThrow()); it("includes calibration", () => expect(scoringPrompt("Title", [{ filename: "lib/a.ts", additions: 1, deletions: 0, patch: "x" }], []).includes("lib/*")).toBe(true)); });

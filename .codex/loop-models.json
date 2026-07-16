@@ -1,0 +1,17 @@
+{
+  "_tiers": "fastest=cheap high-volume work | balanced=code gen, research | capable=hard reasoning, judgment",
+  "_values": "any model ID your Codex runtime accepts, e.g. 'gpt-5.6', 'gpt-5.6-terra', 'gpt-5.6-mini', or 'inherit' to use the session's active model",
+  "_inherit_note": "When resolving 'inherit' into an agent's .toml file, OMIT the model key entirely rather than writing the literal string 'inherit' — Codex custom agents expect either a real model slug or no key at all.",
+  "_examples": {
+    "codex-default": "{ orchestrator: inherit, reviewer-verifier: inherit }",
+    "codex+terra-review": "{ orchestrator: gpt-5.6, reviewer-verifier: gpt-5.6-terra, explorer: gpt-5.6-mini }"
+  },
+  "orchestrator":    "inherit",
+  "env-detector":    "inherit",
+  "explorer":        "inherit",
+  "researcher":      "inherit",
+  "planner":         "inherit",
+  "implementer":     "inherit",
+  "reviewer-verifier": "inherit",
+  "test-runner":     "inherit"
+}
