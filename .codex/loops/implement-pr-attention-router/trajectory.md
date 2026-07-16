@@ -26,3 +26,9 @@
 - Implemented the Next.js 16.2.10 App Router dashboard, signed webhook route, Groq OpenAI-compatible scoring, GitHub Check Runs, Neon repositories/migration, revert calibration, environment template, README, and unit tests.
 - Verified: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd test` (6 passing), and `npm.cmd run build` all exit 0.
 - Initialized local Git after replacing the inaccessible empty metadata directory; root implementation commit: `88aa71d` (`feat: implement pr attention router`).
+
+## 2026-07-16T16:18:00-03:00 VERIFY / DONE
+- Final commits: `9ab0704`, `790118e`, `567a1f9`, `e8b6172`, `01a4c0e`, `cb6d1dd` (all unsigned).
+- Gates passed: lint, typecheck, build, and tests (5 files / 11 tests).
+- Independent reviewer verdict: APPROVE with no CRITICAL or HIGH findings.
+- Verified `IMPLEMENTATION_PLAN.md` and `.agents/` are ignored and absent from reachable and unreachable Git history.
