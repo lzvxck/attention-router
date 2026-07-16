@@ -29,13 +29,7 @@ if [ -f "$FAIL_COUNT_FILE" ]; then
   FAIL_COUNT=$(( raw + 0 )) 2>/dev/null || FAIL_COUNT=0
 fi
 
-# --- Detect package manager from environment.md ---
-ENV_FILE=$(find .codex/loops -name "environment.md" 2>/dev/null | head -1)
-PKG_MGR="npm"
-if [ -n "$ENV_FILE" ]; then
-  if grep -q "pnpm" "$ENV_FILE" 2>/dev/null; then PKG_MGR="pnpm"; fi
-  if grep -q "bun"  "$ENV_FILE" 2>/dev/null; then PKG_MGR="bun";  fi
-fi
+PKG_MGR="bun"
 
 fail=0
 gates_ran=0

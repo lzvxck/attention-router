@@ -28,13 +28,11 @@ while IFS= read -r FILE; do
 done <<< "$CHANGED_FILES"
 
 if [ -n "$TS_FILES" ]; then
-  if command -v prettier &>/dev/null; then
-    prettier --write $TS_FILES --log-level warn
-  elif command -v eslint &>/dev/null; then
-    eslint --fix $TS_FILES 2>/dev/null || true
+  if command -v bun &>/dev/null; then
+    bun x biome check --write --files-ignore-unknown $TS_FILES || true
   fi
-  if command -v tsc &>/dev/null; then
-    tsc --noEmit 2>&1 | head -20 || true
+  if command -v bun &>/dev/null; then
+    bun run typecheck 2>&1 | head -20 || true
   fi
 fi
 

@@ -4,10 +4,13 @@ Submission for **OpenAI Build Week** (Devpost, category **Developer Tools**,
 deadline **July 21, 2026, 5:00pm PT**).
 
 ## Implementation record (2026-07-16)
+
 - Implemented locally as a latest-stable Next.js App Router app; deployment and public repository URLs are still pending.
 - Runtime scoring uses Groq's free-tier-compatible OpenAI chat-completions API at `https://api.groq.com/openai/v1`, not the OpenAI API.
 - `db/migrations/001_initial_schema.sql` adds the four planned tables, unique `(owner,name)` and `(repo_id,number)` keys, and primary-keyed outcomes for webhook redelivery idempotency.
 - The webhook endpoint is `POST /api/github/webhook`; it verifies signatures, scores open/synchronize events, writes Check Runs, and calibrates native merged reverts.
+- Code quality uses Biome (formatter and recommended linter rules) without ESLint or Prettier. Biome's recommended rules cover React exhaustive dependencies and the applicable accessibility checks for this small dashboard.
+- Bun is the package manager and local script runner. Vercel production remains on Node.js: the webhook route explicitly declares `runtime = "nodejs"`; Bun is not a Vercel Functions runtime here.
 
 **Status:** planning complete, no code written yet. This file is the durable
 source of truth — update it (not just `IMPLEMENTATION_PLAN.md`, which is a
@@ -18,12 +21,14 @@ what was actually built, add the real repo names/URLs, and note any schema
 changes made during implementation.
 
 ## What we're building (one-liner)
+
 A GitHub App that scores every PR with an LLM into a risk tier
 (auto-mergeable / quick glance / deep review) with a rationale, calibrated
 against that specific repo's real revert history — an attention router, not
 another "read the diff and comment" review bot.
 
 ## Hard constraints (do not violate)
+
 - The core implementation must be built predominantly **in an OpenAI Codex
   session** — a Codex session ID covering "the majority of core
   functionality" is a submission requirement. This is a build-tool
@@ -42,6 +47,7 @@ another "read the diff and comment" review bot.
     structured/JSON-schema output.
 
 ## Core loop (app repo — build predominantly in Codex)
+
 1. Webhook receiver verifies signature, handles `pull_request` `opened` /
    `synchronize` / `closed`(merged).
 2. On open/sync: fetch diff + changed files; pull prior risk stats for
@@ -56,11 +62,13 @@ another "read the diff and comment" review bot.
    time vs. actual outcome, plus a calibration-over-time view.
 
 **DB schema:**
+
 - `repos(id, owner, name, installation_id)`
 - `pull_requests(id, repo_id, number, title, author, head_sha, files_changed jsonb, risk_tier, risk_rationale, risk_confidence, scored_at)`
 - `outcomes(pr_id, outcome_type, reverted_by_pr_id, detected_at)`
 - `file_risk_stats(repo_id, path_pattern, total_prs, reverted_prs, updated_at)`
 
 ## Rules
+
 Follow `.codex/rules/code-quality.md` when writing, editing, or reviewing any
 code in this repo (simplicity, surgical changes, goal-driven execution).

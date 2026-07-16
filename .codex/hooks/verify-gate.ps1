@@ -28,15 +28,7 @@ if (Test-Path $failCountFile) {
   if ($raw -match '^\d+$') { $failCount = [int]$raw }
 }
 
-# --- Detect package manager ---
-$envFile = Get-ChildItem -Path ".codex/loops" -Recurse -Filter "environment.md" `
-  -ErrorAction SilentlyContinue | Select-Object -First 1
-$pkgMgr = "npm"
-if ($envFile) {
-  $envContent = Get-Content $envFile.FullName -Raw
-  if ($envContent -match "pnpm") { $pkgMgr = "pnpm" }
-  if ($envContent -match "\bbun\b") { $pkgMgr = "bun" }
-}
+$pkgMgr = "bun"
 
 $fail     = $false
 $gatesRan = $false

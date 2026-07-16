@@ -12,11 +12,11 @@ foreach ($file in $changed) {
 
   switch ($ext) {
     { $_ -in "ts","tsx","js","jsx","mjs","cjs" } {
-      if (Get-Command prettier -ErrorAction SilentlyContinue) {
-        prettier --write $file --log-level warn
+      if (Get-Command bun -ErrorAction SilentlyContinue) {
+        & bun x biome check --write --files-ignore-unknown $file
       }
-      if (Get-Command tsc -ErrorAction SilentlyContinue) {
-        tsc --noEmit 2>&1 | Select-Object -First 20
+      if (Get-Command bun -ErrorAction SilentlyContinue) {
+        & bun run typecheck 2>&1 | Select-Object -First 20
       }
     }
     "py" {

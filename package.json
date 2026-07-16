@@ -1,33 +1,32 @@
 {
-  "name": "pr-attention-router",
-  "private": true,
-  "version": "0.1.0",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
-    "@octokit/auth-app": "^8.2.0",
-    "@octokit/rest": "^22.0.0",
-    "@octokit/webhooks": "^14.0.0",
-    "next": "latest",
-    "openai": "^6.16.0",
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@types/node": "^24.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^9.0.0",
-    "eslint-config-next": "latest",
-    "typescript": "^5.0.0",
-    "vitest": "^4.0.0"
-  }
+	"name": "pr-attention-router",
+	"private": true,
+	"version": "0.1.0",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome lint .",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"@neondatabase/serverless": "^1.0.2",
+		"@octokit/auth-app": "^8.2.0",
+		"@octokit/rest": "^22.0.0",
+		"@octokit/webhooks": "^14.0.0",
+		"next": "latest",
+		"openai": "^6.16.0",
+		"react": "latest",
+		"react-dom": "latest"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.4",
+		"@types/node": "^24.0.0",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"typescript": "^5.0.0",
+		"vitest": "^4.0.0"
+	}
 }
