@@ -16,6 +16,6 @@ export function scoringPrompt(title: string, files: ChangedFile[], stats: RiskSt
 export async function scorePullRequest(title: string, files: ChangedFile[], stats: RiskStat[]) {
   const config = env.groq();
   const client = new OpenAI({ apiKey: config.apiKey, baseURL: "https://api.groq.com/openai/v1" });
-  const completion = await client.chat.completions.create({ model: config.model, messages: [{ role: "user", content: scoringPrompt(title, files, stats) }], response_format: { type: "json_object" }, temperature: 0 });
+  const completion = await client.chat.completions.create({ model: config.model, messages: [{ role: "user", content: scoringPrompt(title, files, stats) }], response_format: { type: "json_schema", json_schema: { name: "risk_verdict", strict: true, schema: { type: "object", additionalProperties: false, required: ["tier", "confidence", "rationale", "key_risk_factors"], properties: { tier: { type: "string", enum: riskTiers }, confidence: { type: "number", minimum: 0, maximum: 1 }, rationale: { type: "string" }, key_risk_factors: { type: "array", items: { type: "string" } } } } } }, temperature: 0 });
   return validateVerdict(JSON.parse(completion.choices[0]?.message.content ?? ""));
 }
