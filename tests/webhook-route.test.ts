@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
 	installationClient: vi.fn(),
 	pullRequestContext: vi.fn(),
 	postCheck: vi.fn(),
+	ensureRiskLabels: vi.fn(),
+	applyRiskLabel: vi.fn(),
 	scorePullRequest: vi.fn(),
 }));
 vi.mock("@/lib/repositories", () => ({
@@ -23,6 +25,8 @@ vi.mock("@/lib/github", () => ({
 	installationClient: mocks.installationClient,
 	pullRequestContext: mocks.pullRequestContext,
 	postCheck: mocks.postCheck,
+	ensureRiskLabels: mocks.ensureRiskLabels,
+	applyRiskLabel: mocks.applyRiskLabel,
 }));
 vi.mock("@/lib/risk-scoring", () => ({
 	scorePullRequest: mocks.scorePullRequest,
@@ -89,6 +93,14 @@ describe("GitHub pull request webhooks", () => {
 		expect((await POST(request(payload("opened")))).status).toBe(200);
 		expect(mocks.saveVerdict).toHaveBeenCalledOnce();
 		expect(mocks.postCheck).toHaveBeenCalledOnce();
+		expect(mocks.ensureRiskLabels).toHaveBeenCalledWith({}, "acme", "demo");
+		expect(mocks.applyRiskLabel).toHaveBeenCalledWith(
+			{},
+			"acme",
+			"demo",
+			3,
+			"quick-glance",
+		);
 	});
 	it("calibrates a merged native revert exactly through the revert boundary", async () => {
 		const pr = {

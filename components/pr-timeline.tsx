@@ -263,6 +263,29 @@ export function PrTimeline({
 							</p>
 						</div>
 						<div className="mt-5">
+							<h3 className="text-sm font-bold">Historical calibration</h3>
+							{selected.calibration.some((signal) => signal.samples) ? (
+								<ul className="mt-3 grid list-none gap-2 p-0">
+									{selected.calibration
+										.filter((signal) => signal.samples)
+										.map((signal) => (
+											<li
+												className="rounded-lg bg-surface-2 px-3 py-2 text-sm"
+												key={signal.pattern}
+											>
+												<strong>{signal.pattern}</strong>:{" "}
+												{Math.round(signal.rate * 100)}% reverted across{" "}
+												{signal.samples} scored PRs
+											</li>
+										))}
+								</ul>
+							) : (
+								<p className="mb-0 text-sm text-muted">
+									No prior revert history for these file patterns.
+								</p>
+							)}
+						</div>
+						<div className="mt-5">
 							<div className="flex items-center gap-2">
 								<FileCode2 className="text-primary" size={18} />
 								<h3 className="text-sm font-bold">

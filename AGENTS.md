@@ -63,9 +63,10 @@ with an explanation calibrated against that repository's native revert history.
 
 ## UI
 
-- Follow `DESIGN.md`: Discord-inspired dark surfaces, blurple primary actions,
-  GGSans/Inter stack, 8px spacing, text labels beside risk colors, 44px controls,
-  visible focus treatment, and reduced-motion support.
+- Follow `DESIGN.md` a dark system adapted for this product:
+  near-black surfaces, green primary actions, Circular/Helvetica stack, 8px spacing,
+  text labels beside risk colors, 44px controls, visible focus treatment, and
+  reduced-motion support.
 - The public sign-in control belongs in the top navigation, not the hero.
 
 ## Engineering rules

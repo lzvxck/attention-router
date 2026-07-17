@@ -1,6 +1,8 @@
 import { Webhooks } from "@octokit/webhooks";
 import { env } from "@/lib/env";
 import {
+	applyRiskLabel,
+	ensureRiskLabels,
 	installationClient,
 	postCheck,
 	pullRequestContext,
@@ -85,6 +87,14 @@ export async function POST(request: Request) {
 		repository.name,
 		pr.head.sha,
 		verdict,
+	);
+	await ensureRiskLabels(client, repository.owner.login, repository.name);
+	await applyRiskLabel(
+		client,
+		repository.owner.login,
+		repository.name,
+		pr.number,
+		verdict.tier,
 	);
 	return Response.json({ ok: true });
 }

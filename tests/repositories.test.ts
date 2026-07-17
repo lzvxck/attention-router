@@ -46,7 +46,10 @@ describe("repository idempotency", () => {
 		expect(sql.mock.calls[0][1]).toBe(42);
 	});
 	it("paginates dashboard records in the database", async () => {
-		sql.mockResolvedValueOnce([{ id: 1, total_count: "21" }]);
+		sql.mockResolvedValueOnce([
+			{ id: 1, total_count: "21", files_changed: [] },
+		]);
+		sql.mockResolvedValueOnce([]);
 		await expect(dashboardPage(42, 2)).resolves.toMatchObject({ total: 21 });
 		const [query, repoId, pageSize, offset] = sql.mock.calls[0];
 		expect(query.join("")).toContain("LIMIT");

@@ -16,6 +16,7 @@ vi.mock("@/lib/repositories", () => ({
 				scored_at: "2026-07-10T00:00:00Z",
 				outcome_type: "reverted",
 				files_changed: [],
+				calibration: [],
 			},
 		],
 		total: 21,

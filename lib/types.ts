@@ -32,6 +32,12 @@ export type DashboardPr = {
 	scored_at: string;
 	outcome_type: string | null;
 	files_changed: ChangedFile[];
+	calibration: CalibrationSignal[];
+};
+export type CalibrationSignal = {
+	pattern: string;
+	rate: number;
+	samples: number;
 };
 export type DashboardPage = {
 	records: DashboardPr[];

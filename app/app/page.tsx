@@ -57,10 +57,20 @@ export default async function AppPage() {
 					))}
 				</ul>
 			) : (
-				<p className="m-0 rounded-xl bg-surface-1 p-6 leading-relaxed text-muted">
-					Installed repositories appear after their first pull request webhook
-					is received. Open a PR to see it work.
-				</p>
+				<div className="rounded-xl bg-surface-1 p-6 leading-relaxed text-muted">
+					<p className="m-0">
+						Installed repositories appear after their first pull request webhook
+						is received. Open a PR to see it work.
+					</p>
+					<a
+						className="mt-4 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-bold text-black no-underline transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+						href="https://github.com/apps/attn-router"
+						rel="noreferrer"
+						target="_blank"
+					>
+						Install on GitHub
+					</a>
+				</div>
 			)}
 		</section>
 	);

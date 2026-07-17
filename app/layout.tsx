@@ -2,7 +2,13 @@ import { SignInButton } from "@/components/sign-in-button";
 import { UserMenu } from "@/components/user-menu";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import type { Metadata } from "next";
 import "./globals.css";
+
+export const metadata: Metadata = {
+	title: "PR Attention Router",
+	description: "Route review attention using repository-specific risk signals.",
+};
 
 export default async function Layout({
 	children,
@@ -40,6 +46,14 @@ export default async function Layout({
 								Repositories
 							</a>
 						</nav>
+						<a
+							className="hidden rounded-lg px-3 py-2 text-sm font-bold text-muted no-underline transition hover:bg-surface-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink lg:inline-flex"
+							href="https://github.com/apps/attn-router"
+							rel="noreferrer"
+							target="_blank"
+						>
+							Install on GitHub
+						</a>
 						<div className="ml-auto">
 							{session ? (
 								<UserMenu image={session.user.image} name={session.user.name} />

@@ -3,6 +3,33 @@ import { Octokit } from "@octokit/rest";
 import { env } from "./env";
 import type { ChangedFile, RiskVerdict } from "./types";
 
+const riskLabels = [
+	{
+		color: "1DB954",
+		description: "PR Attention Router: low risk",
+		name: "risk:auto-mergeable",
+	},
+	{
+		color: "F0B232",
+		description: "PR Attention Router: needs a quick glance",
+		name: "risk:quick-glance",
+	},
+	{
+		color: "F15E6C",
+		description: "PR Attention Router: needs deep review",
+		name: "risk:deep-review",
+	},
+] as const;
+
+function isExistingLabelError(error: unknown) {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"status" in error &&
+		error.status === 422
+	);
+}
+
 export type AccessibleRepository = {
 	owner: string;
 	name: string;
@@ -56,6 +83,50 @@ export async function postCheck(
 			summary: verdict.rationale,
 			text: verdict.key_risk_factors.join("\n"),
 		},
+	});
+}
+
+export async function ensureRiskLabels(
+	client: Octokit,
+	owner: string,
+	repo: string,
+) {
+	await Promise.all(
+		riskLabels.map(async (label) => {
+			try {
+				await client.issues.createLabel({ owner, repo, ...label });
+			} catch (error) {
+				if (!isExistingLabelError(error)) throw error;
+			}
+		}),
+	);
+}
+
+export async function applyRiskLabel(
+	client: Octokit,
+	owner: string,
+	repo: string,
+	number: number,
+	tier: RiskVerdict["tier"],
+) {
+	const labels = await client.issues.listLabelsOnIssue({
+		owner,
+		repo,
+		issue_number: number,
+	});
+	await Promise.all(
+		labels.data
+			.map((label) => label.name)
+			.filter((name): name is string => Boolean(name?.startsWith("risk:")))
+			.map((name) =>
+				client.issues.removeLabel({ owner, repo, issue_number: number, name }),
+			),
+	);
+	await client.issues.addLabels({
+		owner,
+		repo,
+		issue_number: number,
+		labels: [`risk:${tier}`],
 	});
 }
 
